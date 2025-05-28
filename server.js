@@ -11,7 +11,8 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Firebase Admin SDK
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+const serviceAccount = require('./serviceAccountKey.json');
+
  // 👈 this JSON file should be downloaded from Firebase project settings
 
 admin.initializeApp({
