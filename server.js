@@ -10,9 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Parse Firebase service account JSON from environment variable
+// Parse Firebase service account from environment variable
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
+// Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -26,7 +27,6 @@ app.post('/api/ask', async (req, res) => {
   }
 
   try {
-    // Store user's message in Firestore
     const userRef = db.collection('users').doc(uid).collection('chatHistory');
     await userRef.add({
       role: 'user',
@@ -34,7 +34,6 @@ app.post('/api/ask', async (req, res) => {
       timestamp: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    // Send message to OpenRouter
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -51,7 +50,6 @@ app.post('/api/ask', async (req, res) => {
 
     const data = await response.json();
 
-    // Store assistant's reply in Firestore
     await userRef.add({
       role: 'assistant',
       content: data.choices?.[0]?.message?.content || '',
